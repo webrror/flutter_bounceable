@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class Bounceable extends StatefulWidget {
   /// Set it to `null` to disable `onTap`.
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final void Function(TapUpDetails)? onTapUp;
   final void Function(TapDownDetails)? onTapDown;
   final VoidCallback? onTapCancel;
@@ -27,7 +28,7 @@ class Bounceable extends StatefulWidget {
   const Bounceable({
     Key? key,
     required this.onTap,
-    required this.child,
+    this.onLongPress,
     this.onTapUp,
     this.onTapDown,
     this.onTapCancel,
@@ -36,10 +37,11 @@ class Bounceable extends StatefulWidget {
     this.curve = Curves.decelerate,
     this.reverseCurve = Curves.decelerate,
     this.scaleFactor = 0.8,
-  })  : assert(
-          scaleFactor >= 0.0 && scaleFactor <= 1.0,
-          "The valid range of scaleFactor is from 0.0 to 1.0.",
-        ),
+    required this.child,
+  }) : assert(
+            scaleFactor >= 0.0 && scaleFactor <= 1.0,
+            "The valid range of scaleFactor is from 0.0 to 1.0.",
+          ),
         super(key: key);
 
   @override
@@ -82,6 +84,14 @@ class _BounceableState extends State<Bounceable>
     });
   }
 
+  void _onLongPress() {
+    if (widget.onLongPress != null) widget.onLongPress!();
+
+    _controller.reverse().then((_) {
+      _controller.forward();
+    });
+  }
+
   void _onTapUp(TapUpDetails details) {
     if (widget.onTapUp != null) widget.onTapUp!(details);
     _controller.forward();
@@ -106,6 +116,7 @@ class _BounceableState extends State<Bounceable>
         onTapDown: widget.onTap != null ? _onTapDown : null,
         onTapUp: widget.onTap != null ? _onTapUp : null,
         onTap: widget.onTap != null ? _onTap : null,
+        onLongPress: widget.onLongPress != null ? _onLongPress : null,
         child: ScaleTransition(
           scale: _animation,
           child: widget.child,
